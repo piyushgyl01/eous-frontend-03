@@ -187,6 +187,12 @@ export const productsSlice = createSlice({
       searchTerm: "",
      },
     error: null,
+    message: {
+      show: false,
+      message: "",
+      type: "warning"
+    }
+  
   },
 
   //SYNCHRONOUS ACTIONS HANDLERS
@@ -234,6 +240,11 @@ export const productsSlice = createSlice({
     setCategory: (state, action) => {
       state.filters.selectedCategories = [action.payload];
     },
+
+    setMessage: (state, action) => {
+      state.message = action.payload;
+    },
+
   },
   //ASYNCHRONOUS ACTION HANDLERS
   extraReducers: (builder) => {
@@ -373,6 +384,7 @@ export const {
   resetFilters,
   setSearchTerm,
   setCategory,
+  setMessage
 } = productsSlice.actions;
 
 export default productsSlice.reducer;

@@ -1,139 +1,17 @@
-import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  fetchAllProductsAsync,
-  selectAllProducts,
-  selectFilteredProducts,
-  selectStatus,
-  updateCartAsync,
-  updateWishlistAsync,
-} from "./productSlice";
-
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import useFilteredProducts from "../../customHooks/useFilteredProducts";
-import useUnfilteredProducts from "../../customHooks/useUnfilteredProducts";
+import useUpdateCart from "../../customHooks/useUpdateCart";
+import useUpdateWishlist from "../../customHooks/useUpdateWishlist";
+import useProductStatuses from "../../customHooks/useProductStatuses";
+import useMessage from "../../customHooks/useMessage";
 
 export default function ProductList() {
-  //STATES
-  const [message, setMessage] = useState({
-    show: false,
-    message: "",
-    type: "warning",
-  });
-  const [wishlistId, setWishlistId] = useState(null);
-  const [cartId, setCartId] = useState(null);
-
-  //USE DISPATCH FUNCTION
-  const dispatch = useDispatch();
-
-  //USE SLECTOR TO GET ALL THE PRODUCTS FROM THE STORE
-  const filteredProducts = useFilteredProducts(); 
-
-  //GETTING STATUS STATES FROM STORE
-  const { fetchStatus, updateCartStatus, updateWishlistStatus } =
-    useSelector(selectStatus);
-
-  //HANDLE UPDATE CART EFFECT
-  useEffect(() => {
-    if (updateCartStatus === "success" && cartId) {
-      setMessage({
-        show: true,
-        message: "Added to cart successfully",
-        type: "success",
-      });
-
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-        setCartId(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    } else if (updateCartStatus === "error" && cartId) {
-      setMessage({
-        show: true,
-        message: "Error adding product to the cart",
-        type: "warning",
-      });
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-        setCartId(null); 
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [updateCartStatus, cartId]);
-
-  //HANDLE UPDATE WISHLIST EFFECT
-  useEffect(() => {
-    if (updateWishlistStatus === "success" && wishlistId) {
-      setMessage({
-        show: true,
-        message: "Wishlist updated successfully",
-        type: "success",
-      });
-
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-        setWishlistId(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    } else if (updateWishlistStatus === "error" && wishlistId) {
-      setMessage({
-        show: true,
-        message: "Error adding product to the cart",
-        type: "warning",
-      });
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-        setWishlistId(null);  // Add timeout for error case too
-      }, 3000);
-  
-      return () => clearTimeout(timer);
-      }
-  }, [updateWishlistStatus, wishlistId]);
-
-  const unfilteredProducts = useUnfilteredProducts();
-
-  //HANDLE UPDATE WISHLIST
-  const handleUpdateWishlist = async (id) => {
-    try {
-      const filteredProduct = unfilteredProducts.filter(
-        (prod) => prod._id === id
-      );
-
-      if (filteredProduct[0].isAddedToCart) {
-        dispatch(updateCartAsync(id));
-      }
-      console.log("cart dispateched");
-
-      setWishlistId(id);
-      await dispatch(updateWishlistAsync(id));
-      // dispatch(fetchProductByIdAsync(id));
-    } catch (error) {
-      console.log("Updating wishlist error", error);
-    }
-  };
-
-  //HANDLE UPDATE CART
-  const handleUpdateCart = async (id) => {
-    try {
-      const filteredProduct = unfilteredProducts.filter(
-        (prod) => prod._id === id
-      );
-
-      if (filteredProduct[0].isWishlisted) {
-        dispatch(updateWishlistAsync(id));
-      }
-
-      setCartId(id);
-      await dispatch(updateCartAsync(id));
-      // dispatch(fetchProductByIdAsync(id));
-    } catch (error) {
-      console.log("Updating cart error", error);
-    }
-  };
+  const filteredProducts = useFilteredProducts();
+  const message = useMessage();
+  const { fetchStatus } = useProductStatuses();
+  const { handleUpdateWishlist, wishlistId } = useUpdateWishlist();
+  const { handleUpdateCart, cartId } = useUpdateCart();
 
   return (
     <main className="row">
@@ -166,11 +44,6 @@ export default function ProductList() {
                       {message.type === "success" ? "Success" : "Warning"}
                     </strong>
                     <small className="text-body-secondary">just now</small>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={() => setMessage({ ...message, show: false })}
-                    ></button>
                   </div>
                   <div className="toast-body">{message.message}</div>
                 </div>

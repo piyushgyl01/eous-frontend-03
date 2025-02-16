@@ -10,97 +10,21 @@ import {
 } from "../../features/product/productSlice";
 
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import useFilteredProducts from "../../customHooks/useFilteredProducts";
+import useMessage from "../../customHooks/useMessage";
+import useProductStatuses from "../../customHooks/useProductStatuses";
+import useUpdateWishlist from "../../customHooks/useUpdateWishlist";
+import useUpdateCart from "../../customHooks/useUpdateCart";
+import useUnfilteredProducts from "../../customHooks/useUnfilteredProducts";
 
 export default function MoreProduct({ id }) {
-  //STATES
-  const [message, setMessage] = useState({
-    show: false,
-    message: "",
-    type: "warning",
-  });
-  const [wishlistId, setWishlistId] = useState(null);
-  const [cartId, setCartId] = useState(null);
-
-  //USE DISPATCH FUNCTION
-  const dispatch = useDispatch();
-
-  //USE SLECTOR TO GET ALL THE PRODUCTS FROM THE STORE
-  const products = useSelector(selectAllProducts);
-
-  //DISPATCHING API CALL
-  useEffect(() => {
-    dispatch(fetchAllProductsAsync());
-  }, [dispatch]);
-
-  //GETTING STATUS STATES FROM STORE
-  const { fetchStatus, updateCartStatus, updateWishlistStatus } =
-    useSelector(selectStatus);
-
-  //HANDLE UPDATE CART EFFECT
-  useEffect(() => {
-    if (updateCartStatus === "success") {
-      setMessage({
-        show: true,
-        message: "Added to cart successfully",
-        type: "success",
-      });
-
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-      }, 3000);
-      setCartId(null);
-
-      return () => clearTimeout(timer);
-    } else if (updateCartStatus === "error") {
-      setMessage({
-        show: true,
-        message: "Error adding product to the cart",
-        type: "warning",
-      });
-      setCartId(null);
-    }
-  }, [updateCartStatus, cartId]);
-
-  //HANDLE UPDATE WISHLIST EFFECT
-  useEffect(() => {
-    if (updateWishlistStatus === "success") {
-      setMessage({
-        show: true,
-        message: "Wishlist updated successfully",
-        type: "success",
-      });
-
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-      }, 3000);
-      setWishlistId(null);
-
-      return () => clearTimeout(timer);
-    } else if (updateWishlistStatus === "error") {
-      setMessage({
-        show: true,
-        message: "Error adding product to the cart",
-        type: "warning",
-      });
-      setWishlistId(null);
-    }
-  }, [updateWishlistStatus, wishlistId]);
-
-  //HANDLE UPDATE WISHLIST
-  const handleUpdateWishlist = (id) => {
-    setWishlistId(id);
-    dispatch(updateWishlistAsync(id));
-  };
-
-  //HANDLE UPDATE CART
-  const handleUpdateCart = (id) => {
-    setCartId(id);
-    dispatch(updateCartAsync(id));
-  };
-
+  const unfilteredProducts = useUnfilteredProducts();
+  const message = useMessage();
+  const { fetchStatus } = useProductStatuses();
+  const { handleUpdateWishlist, wishlistId } = useUpdateWishlist();
+  const { handleUpdateCart, cartId } = useUpdateCart();
   return (
     <main className="row">
-    
       {fetchStatus === "loading" ? (
         <div className="text-center mt-4">
           <div className="spinner-border" role="status">
@@ -131,11 +55,6 @@ export default function MoreProduct({ id }) {
                       {message.type === "success" ? "Success" : "Warning"}
                     </strong>
                     <small className="text-body-secondary">just now</small>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={() => setMessage({ ...message, show: false })}
-                    ></button>
                   </div>
                   <div className="toast-body">{message.message}</div>
                 </div>
@@ -148,7 +67,7 @@ export default function MoreProduct({ id }) {
               Unable to load the products
             </div>
           )}
-          {products
+          {unfilteredProducts
             .filter((product) => product._id !== id)
             .map((product) => (
               <div className="col-md-4 my-3 text-center" key={product._id}>

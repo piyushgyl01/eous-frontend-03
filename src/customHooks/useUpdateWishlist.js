@@ -8,20 +8,20 @@ import {
   updateWishlistAsync,
 } from "../features/product/productSlice";
 
-export default function useUpdateCart() {
+export default function useUpdateWishlist() {
     const dispatch = useDispatch();
     const unfilteredProducts = useUnfilteredProducts();
-    const [cartId, setCartId] = useState(null);
-    const { updateCartStatus } = useSelector(selectStatus);
+    const [wishlistId, setWishlistId] = useState(null);
+    const { updateWishlistStatus } = useSelector(selectStatus);
   
     useEffect(() => {
-      if (updateCartStatus === "success" && cartId) {
-        setCartId(null);
+      if (updateWishlistStatus === "success" && wishlistId) {
+         setWishlistId(null);
         
         dispatch(
           setMessage({
             show: true,
-            message: "Added to cart successfully",
+            message: "Wishlist updated successfully",
             type: "success",
           })
         );
@@ -35,13 +35,14 @@ export default function useUpdateCart() {
             })
           );
         }, 3000);
-      } else if (updateCartStatus === "error" && cartId) {
-        setCartId(null);
+      } else if (updateWishlistStatus === "error" && wishlistId) {
+        // Clear wishlistId immediately when operation fails
+        setWishlistId(null);
         
         dispatch(
           setMessage({
             show: true,
-            message: "Error adding product to the cart",
+            message: "Error updating wishlist",
             type: "warning",
           })
         );
@@ -56,25 +57,25 @@ export default function useUpdateCart() {
           );
         }, 3000);
       }
-    }, [updateCartStatus, cartId, dispatch]);
+    }, [updateWishlistStatus, wishlistId, dispatch]);
   
-    const handleUpdateCart = async (id) => {
+    const handleUpdateWishlist = async (id) => {
       try {
         const filteredProduct = unfilteredProducts.filter(
           (prod) => prod._id === id
         );
   
-        if (filteredProduct[0].isWishlisted) {
-          dispatch(updateWishlistAsync(id));
+        if (filteredProduct[0].isAddedToCart) {
+          dispatch(updateCartAsync(id));
         }
   
-        setCartId(id);
-        await dispatch(updateCartAsync(id));
+        setWishlistId(id);
+        await dispatch(updateWishlistAsync(id));
       } catch (error) {
-        console.log("Updating cart error", error);
-        setCartId(null); 
+        console.log("Updating wishlist error", error);
+        setWishlistId(null); 
       }
     };
   
-    return { handleUpdateCart, cartId };
+    return { handleUpdateWishlist, wishlistId };
   }
