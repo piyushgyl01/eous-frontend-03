@@ -11,6 +11,8 @@ import {
 } from "./productSlice";
 
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import useFilteredProducts from "../../customHooks/useFilteredProducts";
+import useUnfilteredProducts from "../../customHooks/useUnfilteredProducts";
 
 export default function ProductList() {
   //STATES
@@ -26,12 +28,7 @@ export default function ProductList() {
   const dispatch = useDispatch();
 
   //USE SLECTOR TO GET ALL THE PRODUCTS FROM THE STORE
-  const products = useSelector(selectFilteredProducts);
-
-  //DISPATCHING API CALL
-  useEffect(() => {
-    dispatch(fetchAllProductsAsync());
-  }, [dispatch]);
+  const filteredProducts = useFilteredProducts(); 
 
   //GETTING STATUS STATES FROM STORE
   const { fetchStatus, updateCartStatus, updateWishlistStatus } =
@@ -97,7 +94,7 @@ export default function ProductList() {
       }
   }, [updateWishlistStatus, wishlistId]);
 
-  const unfilteredProducts = useSelector(selectAllProducts);
+  const unfilteredProducts = useUnfilteredProducts();
 
   //HANDLE UPDATE WISHLIST
   const handleUpdateWishlist = async (id) => {
@@ -149,7 +146,7 @@ export default function ProductList() {
       ) : (
         <>
           <h1>Showing All Products</h1>
-          <small>(Showing {products.length} Products)</small>
+          <small>(Showing {filteredProducts.length} Products)</small>
           <div
             aria-live="polite"
             aria-atomic="true"
@@ -186,7 +183,7 @@ export default function ProductList() {
               Unable to load the products
             </div>
           )}
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <div className="col-md-4 my-3 text-center" key={product._id}>
               <div className="card position-relative">
                 <div
