@@ -7,6 +7,7 @@ import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined
 import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 import AssignmentReturnOutlinedIcon from "@mui/icons-material/AssignmentReturnOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+import useProductStatuses from "../../customHooks/useProductStatuses";
 
 export default function DetailsCard({
   product,
@@ -21,6 +22,7 @@ export default function DetailsCard({
 }) {
   const navigate = useNavigate();
   const quantity = productQuantities[id] || 1;
+  const {updateCartStatus} = useProductStatuses()
 
   return (
     <div className="row">
@@ -55,7 +57,17 @@ export default function DetailsCard({
               className="bg-primary text-light py-2"
               type="button"
             >
-              Buy Now
+              {updateCartStatus === "loading" ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm"
+                      aria-hidden="true"
+                    ></span>
+                    <span role="status">Buying...</span>
+                  </>
+                ) : (
+                  "Buy Now"
+                )}
             </div>
             {product?.isAddedToCart ? (
               <button
