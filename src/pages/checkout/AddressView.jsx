@@ -13,13 +13,13 @@ export default function AddressView({
         <div className="card-body">
           <div className="d-flex justify-content-between">
             <div className="form-check">
-              <input
+            <label className="form-check-label">
+            <input
                 className="form-check-input"
                 type="radio"
                 checked={selectedAddress === address._id}
                 onChange={() => handleAddressSelect(address)}
               />
-              <label className="form-check-label">
                 <h6>
                   {address.firstName} {address.lastName}
                 </h6>
