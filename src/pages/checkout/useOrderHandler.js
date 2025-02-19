@@ -48,11 +48,15 @@ export default function useOrderHandler() {
         email: "",
       });
 
-      const timer = setTimeout(() => {
-        dispatch(setMessage({ show: false, message: "", type: "warning" }));
+      setTimeout(() => {
+        dispatch(
+          setMessage({
+            show: false,
+            message: "",
+            type: "warning",
+          })
+        );
       }, 3000);
-
-      return () => clearTimeout(timer);
     } else if (addOrderStatus === "error") {
       dispatch(
         setMessage({
@@ -62,7 +66,7 @@ export default function useOrderHandler() {
         })
       );
     }
-  }, [addOrderStatus]);
+  }, [addOrderStatus, dispatch, setFormData]);
 
   const navigate = useNavigate();
 
@@ -76,7 +80,6 @@ export default function useOrderHandler() {
           products.forEach((product) => {
             updateQuantity(product._id, 1);
           });
-          navigate("/order-placed");
         } catch (error) {
           console.error("Error clearing cart:", error);
         }
@@ -126,7 +129,6 @@ export default function useOrderHandler() {
 
     try {
       await dispatch(postOrder(orderData));
-
       navigate("/order-placed");
     } catch (error) {
       console.error("Error placing order:", error);

@@ -13,6 +13,7 @@ export default function AddressFormFields({ formData, setFormData }) {
               firstName: e.target.value,
             })
           }
+          placeholder="John"
           required
         />
       </div>
@@ -28,6 +29,7 @@ export default function AddressFormFields({ formData, setFormData }) {
               lastName: e.target.value,
             })
           }
+          placeholder="Doe"
           required
         />
       </div>
@@ -43,6 +45,7 @@ export default function AddressFormFields({ formData, setFormData }) {
               street: e.target.value,
             })
           }
+          placeholder="123 Main Street"
           required
         />
       </div>
@@ -58,6 +61,7 @@ export default function AddressFormFields({ formData, setFormData }) {
               town: e.target.value,
             })
           }
+          placeholder="New York"
           required
         />
       </div>
@@ -73,6 +77,7 @@ export default function AddressFormFields({ formData, setFormData }) {
               province: e.target.value,
             })
           }
+          placeholder="California"
           required
         />
       </div>
@@ -88,6 +93,7 @@ export default function AddressFormFields({ formData, setFormData }) {
               zip: parseFloat(e.target.value),
             })
           }
+          placeholder="90210 or A1B 2C3"
           required
         />
       </div>
@@ -103,6 +109,7 @@ export default function AddressFormFields({ formData, setFormData }) {
               country: e.target.value,
             })
           }
+          placeholder="United States"
           required
         />
       </div>
@@ -118,6 +125,7 @@ export default function AddressFormFields({ formData, setFormData }) {
               phoneNumber: parseFloat(e.target.value),
             })
           }
+          placeholder="+1 (555) 123-4567"
           required
         />
       </div>
@@ -133,6 +141,7 @@ export default function AddressFormFields({ formData, setFormData }) {
               email: e.target.value,
             })
           }
+          placeholder="john.doe@example.com"
           required
         />
       </div>
