@@ -42,33 +42,35 @@ export default function Filters() {
 
   return (
     <>
-     <button
-  className={`btn w-100 d-md-none mb-3 d-flex align-items-center justify-content-between ${
-    isFiltersVisible ? "btn-dark" : "btn-outline-dark"
-  }`}
-  onClick={() => setIsFiltersVisible(!isFiltersVisible)}
-  aria-expanded={isFiltersVisible}
-  aria-controls="mobile-filters"
->
-  <div className="d-flex align-items-center gap-2">
-    <i className={`bi bi-funnel${isFiltersVisible ? "-fill" : ""} fs-5`}></i>
-    <span className="fw-semibold">
-      {isFiltersVisible ? "Hide Filters" : "Show Filters"}
-    </span>
-  </div>
-  
-  {(filters.selectedCategories.length > 0 || 
-    filters.selectedRating > 0 || 
-    filters.sortOrder !== "lowToHigh") && (
-    <span className="badge bg-danger rounded-pill">
-      {[
-        filters.selectedCategories.length,
-        filters.selectedRating > 0 ? 1 : 0,
-        filters.sortOrder !== "lowToHigh" ? 1 : 0
-      ].reduce((a, b) => a + b, 0)}
-    </span>
-  )}
-</button>
+      <button
+        className={`btn w-100 d-md-none mb-3 d-flex align-items-center justify-content-between ${
+          isFiltersVisible ? "btn-dark" : "btn-outline-dark"
+        }`}
+        onClick={() => setIsFiltersVisible(!isFiltersVisible)}
+        aria-expanded={isFiltersVisible}
+        aria-controls="mobile-filters"
+      >
+        <div className="d-flex align-items-center gap-2">
+          <i
+            className={`bi bi-funnel${isFiltersVisible ? "-fill" : ""} fs-5`}
+          ></i>
+          <span className="fw-semibold">
+            {isFiltersVisible ? "Hide Filters" : "Show Filters"}
+          </span>
+        </div>
+
+        {(filters.selectedCategories.length > 0 ||
+          filters.selectedRating > 0 ||
+          filters.sortOrder !== "lowToHigh") && (
+          <span className="badge bg-danger rounded-pill">
+            {[
+              filters.selectedCategories.length,
+              filters.selectedRating > 0 ? 1 : 0,
+              filters.sortOrder !== "lowToHigh" ? 1 : 0,
+            ].reduce((a, b) => a + b, 0)}
+          </span>
+        )}
+      </button>
       <div
         className={`${isFiltersVisible ? "d-block" : "d-none"} d-md-block`}
         id="mobile-filters"

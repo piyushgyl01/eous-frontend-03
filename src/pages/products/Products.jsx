@@ -6,12 +6,11 @@ export default function Products() {
     <main className="container my-5">
       <div className="row">
         <div className="col-md-3">
-           <Filters />
+          <Filters />
         </div>
         <div className="col-md-9">
-        <ProductList />
+          <ProductList />
         </div>
-
       </div>
     </main>
   );

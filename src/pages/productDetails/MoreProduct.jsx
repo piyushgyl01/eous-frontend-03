@@ -1,16 +1,5 @@
-import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  fetchAllProductsAsync,
-  selectAllProducts,
-  selectStatus,
-  updateCartAsync,
-  updateWishlistAsync,
-} from "../../features/product/productSlice";
-
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import useFilteredProducts from "../../customHooks/useFilteredProducts";
 import useMessage from "../../customHooks/useMessage";
 import useProductStatuses from "../../customHooks/useProductStatuses";
 import useUpdateWishlist from "../../customHooks/useUpdateWishlist";
@@ -23,6 +12,7 @@ export default function MoreProduct({ id }) {
   const { fetchStatus } = useProductStatuses();
   const { handleUpdateWishlist, wishlistId } = useUpdateWishlist();
   const { handleUpdateCart, cartId } = useUpdateCart();
+
   return (
     <main className="row">
       {fetchStatus === "loading" ? (

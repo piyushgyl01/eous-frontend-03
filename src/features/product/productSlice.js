@@ -7,9 +7,6 @@ import axios from "axios";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
-//API CALLS USING ASYNC THUNK
-
-//GET ALL PRODUCTS
 export const fetchAllProductsAsync = createAsyncThunk(
   "products/fetchAllProducts",
   async () => {
@@ -24,7 +21,6 @@ export const fetchAllProductsAsync = createAsyncThunk(
   }
 );
 
-//GET PRODUCT BY ID
 export const fetchProductByIdAsync = createAsyncThunk(
   "products/fetchProductById",
   async (id) => {
@@ -39,7 +35,6 @@ export const fetchProductByIdAsync = createAsyncThunk(
   }
 );
 
-//GET PRODUCT BY CATEGORY
 export const fetchProductByCategoryAsync = createAsyncThunk(
   "products/fetchProductByCategory",
   async (category) => {
@@ -56,7 +51,6 @@ export const fetchProductByCategoryAsync = createAsyncThunk(
   }
 );
 
-//GET WISHLISTED PRODUCTS
 export const fetchWishlistedProductsAsync = createAsyncThunk(
   "products/fetchWishlistedProducts",
   async () => {
@@ -71,7 +65,6 @@ export const fetchWishlistedProductsAsync = createAsyncThunk(
   }
 );
 
-//GET CART PRODUCTS
 export const fetchCartProductsAsync = createAsyncThunk(
   "products/fetchCartProducts",
   async () => {
@@ -86,7 +79,6 @@ export const fetchCartProductsAsync = createAsyncThunk(
   }
 );
 
-//UPDATE WISHLIST
 export const updateWishlistAsync = createAsyncThunk(
   "products/updateWishlist",
   async (id) => {
@@ -101,7 +93,6 @@ export const updateWishlistAsync = createAsyncThunk(
   }
 );
 
-//UPDATE CART
 export const updateCartAsync = createAsyncThunk(
   "products/updateCartAsync",
   async (id) => {
@@ -123,7 +114,6 @@ export const selectWishlistItems = (state) => state.products.wishlistItems;
 export const selectStatus = (state) => state.products.status;
 export const selectFilters = (state) => state.products.filters;
 
-//FILTER ACTIONS
 export const selectFilteredProducts = createSelector(
   [selectAllProducts, selectFilters],
   (products, filters) => {
@@ -162,12 +152,11 @@ export const selectFilteredProducts = createSelector(
   }
 );
 
-//REDUX SLICE CONFIGURATION
 export const productsSlice = createSlice({
   name: "products",
   initialState: {
     products: [],
-    selectedProduct: null,  
+    selectedProduct: null,
     cartItems: [],
     wishlistItems: [],
     status: {
@@ -180,22 +169,20 @@ export const productsSlice = createSlice({
       updateWishlistStatus: "idle",
     },
     filters: {
-      priceRange: { min: 0, max: 8000 },  
-      selectedCategories: [],  
-      selectedRating: 0, 
+      priceRange: { min: 0, max: 8000 },
+      selectedCategories: [],
+      selectedRating: 0,
       sortOrder: "lowToHigh",
       searchTerm: "",
-     },
+    },
     error: null,
     message: {
       show: false,
       message: "",
-      type: "warning"
-    }
-  
+      type: "warning",
+    },
   },
 
-  //SYNCHRONOUS ACTIONS HANDLERS
   reducers: {
     // Price range filter
     setPriceRange: (state, action) => {
@@ -244,7 +231,6 @@ export const productsSlice = createSlice({
     setMessage: (state, action) => {
       state.message = action.payload;
     },
-
   },
   //ASYNCHRONOUS ACTION HANDLERS
   extraReducers: (builder) => {
@@ -321,7 +307,7 @@ export const productsSlice = createSlice({
       })
       .addCase(updateWishlistAsync.fulfilled, (state, action) => {
         state.status.updateWishlistStatus = "success";
-         const index = state.products.findIndex(
+        const index = state.products.findIndex(
           (p) => p._id === action.payload._id
         );
         if (index !== -1) {
@@ -333,6 +319,12 @@ export const productsSlice = createSlice({
           state.wishlistItems = state.wishlistItems.filter(
             (item) => item._id !== action.payload._id
           );
+        }
+        if (
+          state.selectedProduct &&
+          state.selectedProduct._id === action.payload._id
+        ) {
+          state.selectedProduct = action.payload; // Update selectedProduct
         }
       })
       .addCase(updateWishlistAsync.rejected, (state, action) => {
@@ -346,7 +338,7 @@ export const productsSlice = createSlice({
       })
       .addCase(updateCartAsync.fulfilled, (state, action) => {
         state.status.updateCartStatus = "success";
-         const index = state.products.findIndex(
+        const index = state.products.findIndex(
           (p) => p._id === action.payload._id
         );
         if (index !== -1) {
@@ -358,6 +350,13 @@ export const productsSlice = createSlice({
           state.cartItems = state.cartItems.filter(
             (item) => item._id !== action.payload._id
           );
+        }
+
+        if (
+          state.selectedProduct &&
+          state.selectedProduct._id === action.payload._id
+        ) {
+          state.selectedProduct = action.payload; // Update selectedProduct
         }
       })
       .addCase(updateCartAsync.rejected, (state, action) => {
@@ -384,7 +383,7 @@ export const {
   resetFilters,
   setSearchTerm,
   setCategory,
-  setMessage
+  setMessage,
 } = productsSlice.actions;
 
 export default productsSlice.reducer;

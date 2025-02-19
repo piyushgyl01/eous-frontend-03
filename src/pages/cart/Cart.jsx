@@ -1,172 +1,24 @@
-import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  fetchAllProductsAsync,
-  fetchCartProductsAsync,
-  selectAllProducts,
-  selectCartItems,
-  selectStatus,
-  updateCartAsync,
-  updateWishlistAsync,
-} from "../../features/product/productSlice";
-
 import EmptyCart from "./EmptyCart";
-import useQuantity from "../../contexts/CartContext";
+import useProductStatuses from "../../customHooks/useProductStatuses";
+import useCartProducts from "./useCartProducts";
+import useMessage from "../../customHooks/useMessage";
+import useUpdateWishlist from "../../customHooks/useUpdateWishlist";
+import useUpdateCart from "../../customHooks/useUpdateCart";
+import usePriceDetails from "../../customHooks/usePriceDetails";
 
 export default function Cart() {
-  //STATES
-  const [message, setMessage] = useState({
-    show: false,
-    message: "",
-    type: "warning",
-  });
-  const { productQuantities, updateQuantity } = useQuantity();
-
-  const [wishlistId, setWishlistId] = useState(null);
-  const [cartId, setCartId] = useState(null);
-  const handleDecrement = (productId) => {
-    updateQuantity(productId, (productQuantities[productId] || 1) - 1);
-  };
-
-  const handleIncrement = (productId) => {
-    updateQuantity(productId, (productQuantities[productId] || 1) + 1);
-  };
-
-  //USE DISPATCH FUNCTION
-  const dispatch = useDispatch();
-
-  //USE SLECTOR TO GET ALL THE PRODUCTS FROM THE STORE
-  const products = useSelector(selectCartItems);
-
-  //DISPATCHING API CALL
-  useEffect(() => {
-    dispatch(fetchCartProductsAsync());
-  }, [dispatch]);
-  useEffect(() => {
-    dispatch(fetchAllProductsAsync());
-  }, [dispatch]);
-
-  //GETTING STATUS STATES FROM STORE
-  const { fetchCartProductsStatus, updateCartStatus, updateWishlistStatus } =
-    useSelector(selectStatus);
-
-  //HANDLE UPDATE CART EFFECT
-  useEffect(() => {
-    if (updateCartStatus === "success" && cartId) {
-      setMessage({
-        show: true,
-        message: "Removed from the cart",
-        type: "success",
-      });
-
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-        setCartId(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    } else if (updateCartStatus === "error" && cartId) {
-      setMessage({
-        show: true,
-        message: "Error adding product to the cart",
-        type: "warning",
-      });
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-        setCartId(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [updateCartStatus, cartId]);
-
-  //HANDLE UPDATE WISHLIST EFFECT
-  useEffect(() => {
-    if (updateWishlistStatus === "success" && wishlistId) {
-      setMessage({
-        show: true,
-        message: "Moved to wishlist",
-        type: "success",
-      });
-
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-        setWishlistId(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    } else if (updateWishlistStatus === "error" && wishlistId) {
-      setMessage({
-        show: true,
-        message: "Error adding product to the cart",
-        type: "warning",
-      });
-
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-        setWishlistId(null); // Add timeout for error case too
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [updateWishlistStatus, wishlistId]);
-
-  const unfilteredProducts = useSelector(selectAllProducts);
-
-  //HANDLE UPDATE WISHLIST
-  const handleUpdateWishlist = async (id) => {
-    try {
-      const filteredProduct = unfilteredProducts.filter(
-        (prod) => prod._id === id
-      );
-
-      if (filteredProduct[0].isAddedToCart) {
-        dispatch(updateCartAsync(id));
-      }
-
-      setWishlistId(id);
-      await dispatch(updateWishlistAsync(id));
-      // dispatch(fetchProductByIdAsync(id));
-    } catch (error) {
-      console.log("Updating wishlist error", error);
-    }
-  };
-
-  const totalDiscountedPrice = products.reduce((acc, product) => {
-    const qty = productQuantities[product._id] || 1;
-    return acc + product.productPrice * qty;
-  }, 0);
-
-  const totalOriginalPrice = products.reduce((acc, product) => {
-    const qty = productQuantities[product._id] || 1;
-    return acc + product.productPrice * 2 * qty;
-  }, 0);
-
-  const discount = totalOriginalPrice - totalDiscountedPrice;
-  const deliveryCharges =
-    products.length > 0 ? (totalDiscountedPrice > 100 ? 0 : 5) : 0;
-  const totalAmount = totalDiscountedPrice + deliveryCharges;
-  const savings = discount;
-
-  //HANDLE UPDATE CART
-  const handleUpdateCart = async (id) => {
-    try {
-      const filteredProduct = unfilteredProducts.filter(
-        (prod) => prod._id === id
-      );
-
-      if (filteredProduct[0].isWishlisted) {
-        dispatch(updateWishlistAsync(id));
-      }
-
-      setCartId(id);
-      await dispatch(updateCartAsync(id));
-      // dispatch(fetchProductByIdAsync(id));
-    } catch (error) {
-      console.log("Updating cart error", error);
-    }
-  };
+  const message = useMessage();
+  const products = useCartProducts();
+  const {
+    handleDecrement,
+    handleIncrement,
+    totalDiscountedPrice,
+    productQuantities,
+  } = usePriceDetails();
+  const { fetchCartProductsStatus } = useProductStatuses();
+  const { handleUpdateWishlist, wishlistId } = useUpdateWishlist();
+  const { handleUpdateCart, cartId } = useUpdateCart();
 
   return (
     <div className="container my-5">

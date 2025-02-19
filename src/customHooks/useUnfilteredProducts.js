@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { fetchAllProductsAsync, selectAllProducts, selectFilteredProducts } from "../features/product/productSlice";
 
 export default function useUnfilteredProducts() {

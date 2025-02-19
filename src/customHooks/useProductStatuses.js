@@ -1,5 +1,5 @@
 import { selectStatus } from "../features/product/productSlice";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 export default function useProductStatuses() {
   const {

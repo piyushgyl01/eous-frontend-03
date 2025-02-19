@@ -21,7 +21,7 @@ export default function useUpdateCart() {
         dispatch(
           setMessage({
             show: true,
-            message: "Added to cart successfully",
+            message: "Cart updated successfully",
             type: "success",
           })
         );

@@ -8,16 +8,17 @@ import "bootstrap/dist/js/bootstrap.js";
 import Navbar from "./components/Navbar.jsx";
 import Cart from "./pages/cart/Cart.jsx";
 import Wishlist from "./pages/wishlist/Wishlist.jsx";
-import Profile from "./pages/Profile.jsx";
+import Profile from "./pages/profile/Profile.jsx";
 import Homepage from "./pages/Homepage.jsx";
 import Products from "./pages/products/Products.jsx";
 import ProductDetails from "./pages/productDetails/ProductDetails.jsx";
-import Checkout from "./pages/Checkout.jsx";
+import Checkout from "./pages/checkout/Checkout.jsx";
 import OrderPlaced from "./pages/OrderPlaced.jsx";
 
 import store from "./app/store.js";
 
 import { CartProvider } from "./contexts/CartContext.jsx";
+import { AddressProvider } from "./contexts/AddressContext.jsx";
 import { Provider } from "react-redux";
 
 const router = createBrowserRouter([
@@ -65,9 +66,11 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
       <CartProvider>
-        <RouterProvider router={router}>
-          <Homepage />
-        </RouterProvider>
+        <AddressProvider>
+          <RouterProvider router={router}>
+            <Homepage />
+          </RouterProvider>
+        </AddressProvider>
       </CartProvider>
     </Provider>
   </StrictMode>

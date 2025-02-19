@@ -1,233 +1,24 @@
-import { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
-  deleteAddress,
-  fetchAllAddresses,
-  getAllAddresses,
+  
   getAllAddressStatuses,
-  postAddress,
-  updateAddress,
-} from "../features/address/addressSlice";
-import { fetchAllOrders, getAllOrders } from "../features/order/orderSlice";
+} from "../../features/address/addressSlice";
+import useAddressContext from "../../contexts/AddressContext";
+import useMessage from "../../customHooks/useMessage";
+import useOrders from "./useOrders";
+import useProfileHandler from "./useProfileHandler";
 
 export default function Profile() {
-  //STATES
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    country: "",
-    street: "",
-    town: "",
-    province: "",
-    zip: 0,
-    phoneNumber: 0,
-    email: "",
-  });
-  const [message, setMessage] = useState({
-    show: false,
-    message: "",
-    type: "warning",
-  });
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [addressToDelete, setAddressToDelete] = useState(null);
-  const [editAddressId, setEditAddressId] = useState(null);
-  const handleAddressSelect = (address) => {
-    setSelectedAddress(address._id);
-    setFormData({
-      firstName: address.firstName,
-      lastName: address.lastName,
-      country: address.country,
-      street: address.street,
-      town: address.town,
-      province: address.province,
-      zip: address.zip,
-      phoneNumber: address.phoneNumber,
-      email: address.email,
-    });
-  };
-  const handleEditClick = (address) => {
-    // setFormData(address);
-    // setEditAddressId(address._id);
-    setShowEditModal(true);
-  };
-  const handleModalClose = () => {
-    setShowEditModal(false);
-    setEditAddressId(null);
-    setFormData({
-      firstName: "",
-      lastName: "",
-      country: "",
-      street: "",
-      town: "",
-      province: "",
-      zip: 0,
-      phoneNumber: 0,
-      email: "",
-    });
-  };
-
-  //USE DISPATCH FUNCTION
-  const dispatch = useDispatch();
-
-  //USE SLECTOR TO GET ALL THE PRODUCTS FROM THE STORE
-  const addresses = useSelector(getAllAddresses);
-
-  const orders = useSelector(getAllOrders);
-
-  useEffect(() => {
-    dispatch(fetchAllOrders());
-  }, [dispatch]);
-
-  //DISPATCHING API CALL
-  useEffect(() => {
-    dispatch(fetchAllAddresses());
-  }, [dispatch]);
-
-  //GET ALL STATUSES FROM THE STORE
-  const { fetchStatus, deleteStatus, updateStatus, addStatus } = useSelector(
-    getAllAddressStatuses
-  );
-
-  //DELETE ADDRESS NOTIFICATION EFFECT
-  useEffect(() => {
-    if (deleteStatus === "success") {
-      setMessage({
-        show: true,
-        message: "Address deleted successfully",
-        type: "success",
-      });
-
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    } else if (deleteStatus === "error") {
-      setMessage({
-        show: true,
-        message: "Unable to delete the address",
-        type: "warning",
-      });
-    }
-  }, [deleteStatus]);
-
-  //DELETE ADDRESS NOTIFICATION EFFECT
-  useEffect(() => {
-    if (updateStatus === "success") {
-      setMessage({
-        show: true,
-        message: "Address updated successfully",
-        type: "success",
-      });
-
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    } else if (updateStatus === "error") {
-      setMessage({
-        show: true,
-        message: "Unable to update the address",
-        type: "warning",
-      });
-    }
-  }, [updateStatus]);
-
-  //DELETE ADDRESS NOTIFICATION EFFECT
-  useEffect(() => {
-    if (addStatus === "success") {
-      setMessage({
-        show: true,
-        message: "Order placed successfully",
-        type: "success",
-      });
-
-      setFormData({
-        firstName: "",
-        lastName: "",
-        country: "",
-        street: "",
-        town: "",
-        province: "",
-        zip: 0,
-        phoneNumber: 0,
-        email: "",
-      });
-      setShowEditModal(false);
-
-      const timer = setTimeout(() => {
-        setMessage({ show: false, message: "", type: "warning" });
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    } else if (addStatus === "error") {
-      setMessage({
-        show: true,
-        message: "Unable to place the order",
-        type: "warning",
-      });
-    }
-  }, [addStatus]);
-
-  //HANDLE DELETE FUNCTION
-  const handleDelete = (id) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this address?"
-    );
-
-    if (isConfirmed) {
-      dispatch(deleteAddress(id));
-    }
-  };
-
-  //HANDLE UPDATE FUNCTION
-  const handleUpdate = () => {
-    dispatch(updateAddress({ id: editAddressId, formData }));
-    handleModalClose();
-  };
-
-  const handlePlaceOrder = () => {
-    // User has entered a new address
-    dispatch(postAddress(formData));
-    // User has selected an existing address
-    // Perform any necessary actions with the selected address
-    // Skip posting the address
-  };
-
-  // Mock data for order history
-  const orderHistory = [
-    {
-      orderId: "ORD-2024-001",
-      date: "February 10, 2024",
-      items: [
-        { name: "Wireless Earbuds", quantity: 1, price: 129.99 },
-        { name: "Phone Case", quantity: 2, price: 24.99 },
-      ],
-      total: 179.97,
-      status: "Delivered",
-    },
-    {
-      orderId: "ORD-2024-002",
-      date: "January 25, 2024",
-      items: [{ name: "Smart Watch", quantity: 1, price: 299.99 }],
-      total: 299.99,
-      status: "Processing",
-    },
-    {
-      orderId: "ORD-2023-089",
-      date: "December 15, 2023",
-      items: [
-        { name: "Bluetooth Speaker", quantity: 1, price: 79.99 },
-        { name: "Power Bank", quantity: 1, price: 49.99 },
-        { name: "USB Cable", quantity: 2, price: 12.99 },
-      ],
-      total: 155.96,
-      status: "Delivered",
-    },
-  ];
+  const { formData, setFormData } = useAddressContext();
+  const { message } = useMessage();
+  const {
+    showEditModal,
+    handleEditClick,
+    handleModalClose,
+    handlePostAddress,
+  } = useProfileHandler();
+  const orders = useOrders();
+  const { fetchStatus, addStatus } = useSelector(getAllAddressStatuses);
 
   return (
     <>
@@ -270,13 +61,11 @@ export default function Profile() {
                 )}
               </div>
             </div>
-            {/* Profile Header Section */}
             <div className="d-flex justify-content-between mb-4">
               <h1>
                 Welcome! <span className="text-primary">John Doe</span>
               </h1>
             </div>
-            {/* Profile Information Card */}
             <div className="card shadow">
               <div className="card-body p-4">
                 <h2 className="text-primary mb-4">Profile Information</h2>
@@ -307,7 +96,6 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* Address Details Section */}
                   <div className="col-12 col-md-6">
                     <div>
                       <div className="d-flex align-items-center justify-content-between mb-2">
@@ -343,7 +131,6 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* Account Information */}
                   <div className="col-12">
                     <div className="mt-2 text-secondary">
                       <small>Account created: January 1, 2024</small>
@@ -358,10 +145,8 @@ export default function Profile() {
               <div className="card-body p-4">
                 <h2 className="text-primary mb-4">Order History</h2>
 
-                {/* Map through order history */}
                 {orders.map((order) => (
                   <div key={order._id} className="card mb-3">
-                    {/* Order Header */}
                     <div className="card-header p-3 bg-light border-bottom">
                       <div className="row align-items-center">
                         <div className="col-md-4 mb-2 mb-md-0">
@@ -416,7 +201,6 @@ export default function Profile() {
                         </div>
                       </div>
                     </div>
-                    {/* Order Details Table */}
                     <div className="card-body">
                       <div className="table-responsive">
                         <table className="table table-borderless mb-0">
@@ -463,10 +247,9 @@ export default function Profile() {
                   </div>
                 ))}
               </div>
-            </div>{" "}
+            </div>
           </>
         )}
-        {/* Order History Section */}
 
         <div
           className={`mt-5 pt-3 modal fade ${
@@ -485,7 +268,6 @@ export default function Profile() {
                 ></button>
               </div>
               <div className="modal-body">
-                {/* Add form fields similar to main form */}{" "}
                 <form>
                   <div className="row g-3">
                     <div className="col-md-6">
@@ -637,8 +419,8 @@ export default function Profile() {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  onClick={() => dispatch(postAddress(formData))}
-                >
+                  onClick={() => handlePostAddress()} 
+                  >
                   {addStatus === "loading" ? "Adding..." : "Add Address"}
                 </button>
               </div>
