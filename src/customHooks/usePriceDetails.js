@@ -1,5 +1,5 @@
 import useQuantity from "../contexts/CartContext";
-import useCartProducts from "../pages/cart/useCartProducts";
+import useCartProducts from "./useCartProducts";
 
 export default function usePriceDetails() {
   const { productQuantities, updateQuantity } = useQuantity();
@@ -35,7 +35,8 @@ export default function usePriceDetails() {
     handleIncrement,
     totalDiscountedPrice,
     totalOriginalPrice,
-    discount, 
-    deliveryCharges, productQuantities
+    discount,
+    deliveryCharges,
+    productQuantities,
   };
 }

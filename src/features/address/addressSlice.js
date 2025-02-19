@@ -7,7 +7,6 @@ import axios from "axios";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
-//GET ALL ADDRESSES
 export const fetchAllAddresses = createAsyncThunk(
   "address/fetchAllAddresses",
   async () => {
@@ -22,7 +21,6 @@ export const fetchAllAddresses = createAsyncThunk(
   }
 );
 
-//ADD NEW ADDRESS
 export const postAddress = createAsyncThunk(
   "address/postAddress",
   async (formData) => {
@@ -37,7 +35,6 @@ export const postAddress = createAsyncThunk(
   }
 );
 
-//UPDATE EXISTING ADDRESS
 export const updateAddress = createAsyncThunk(
   "address/updateAddress",
   async ({ id, formData }) => {
@@ -55,7 +52,6 @@ export const updateAddress = createAsyncThunk(
   }
 );
 
-//UPDATE EXISTING ADDRESS
 export const deleteAddress = createAsyncThunk(
   "address/deleteAddress",
   async (id) => {
@@ -83,7 +79,6 @@ export const addressSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch all addresses
       .addCase(fetchAllAddresses.pending, (state) => {
         state.fetchStatus = "loading";
       })
@@ -97,7 +92,6 @@ export const addressSlice = createSlice({
         state.error = action.error.message;
       })
 
-      // Post new address
       .addCase(postAddress.pending, (state) => {
         state.addStatus = "loading";
       })
@@ -111,7 +105,6 @@ export const addressSlice = createSlice({
         state.error = action.error.message;
       })
 
-      // Delete address
       .addCase(deleteAddress.pending, (state) => {
         state.deleteStatus = "loading";
       })
@@ -127,7 +120,6 @@ export const addressSlice = createSlice({
         state.error = action.error.message;
       })
 
-      // Update address
       .addCase(updateAddress.pending, (state) => {
         state.updateStatus = "loading";
       })
@@ -156,13 +148,13 @@ export const getAllAddressStatuses = createSelector(
   (state) => state.address.addStatus,
   (state) => state.address.deleteStatus,
   (state) => state.address.updateStatus,
- 
-  (fetchStatus, addStatus, deleteStatus, updateStatus,  ) => ({
+
+  (fetchStatus, addStatus, deleteStatus, updateStatus) => ({
     fetchStatus,
     addStatus,
     deleteStatus,
     updateStatus,
-   })
+  })
 );
 
 export default addressSlice.reducer;

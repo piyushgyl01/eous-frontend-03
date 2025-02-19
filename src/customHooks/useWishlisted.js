@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import {
   fetchWishlistedProductsAsync,
   selectWishlistItems,
-} from "../../features/product/productSlice";
+} from "../features/product/productSlice";
 
 export default function useWishlisted() {
   const dispatch = useDispatch();

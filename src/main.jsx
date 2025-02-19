@@ -5,7 +5,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.js";
 
-import Navbar from "./components/Navbar.jsx";
+import Navbar from "./components/navbar/Navbar.jsx";
 import Cart from "./pages/cart/Cart.jsx";
 import Wishlist from "./pages/wishlist/Wishlist.jsx";
 import Profile from "./pages/profile/Profile.jsx";

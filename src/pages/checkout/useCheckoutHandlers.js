@@ -9,7 +9,7 @@ import { setMessage } from "../../features/product/productSlice";
 import useAddressContext from "../../contexts/AddressContext";
 
 export default function useCheckoutHandlers() {
-  const {formData, setFormData} = useAddressContext()
+  const { formData, setFormData } = useAddressContext();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editAddressId, setEditAddressId] = useState(null);
@@ -51,9 +51,7 @@ export default function useCheckoutHandlers() {
     });
   };
 
-  const { fetchStatus, deleteStatus, updateStatus, addStatus } = useSelector(
-    getAllAddressStatuses
-  );
+  const { deleteStatus, updateStatus } = useSelector(getAllAddressStatuses);
   useEffect(() => {
     if (deleteStatus === "success") {
       dispatch(
@@ -80,7 +78,6 @@ export default function useCheckoutHandlers() {
     }
   }, [deleteStatus]);
 
-  //DELETE ADDRESS NOTIFICATION EFFECT
   useEffect(() => {
     if (updateStatus === "success") {
       dispatch(
@@ -107,7 +104,6 @@ export default function useCheckoutHandlers() {
     }
   }, [updateStatus]);
 
-  //HANDLE DELETE FUNCTION
   const handleDelete = (id) => {
     const isConfirmed = window.confirm(
       "Are you sure you want to delete this address?"
@@ -118,7 +114,6 @@ export default function useCheckoutHandlers() {
     }
   };
 
-  //HANDLE UPDATE FUNCTION
   const handleUpdate = () => {
     dispatch(updateAddress({ id: editAddressId, formData }));
     handleModalClose();

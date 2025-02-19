@@ -10,7 +10,6 @@ export default function useAddress() {
 
   const addresses = useSelector(getAllAddresses);
 
-  //DISPATCHING API CALL
   useEffect(() => {
     dispatch(fetchAllAddresses());
   }, [dispatch]);

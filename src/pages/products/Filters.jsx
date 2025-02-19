@@ -1,167 +1,126 @@
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setPriceRange,
-  toggleCategory,
-  setRating,
-  setSortOrder,
-  resetFilters,
-  selectFilters,
-} from "../../features/product/productSlice";
 import { useState } from "react";
+import useFilterHandlers from "../../customHooks/useFilterHandlers";
 
 export default function Filters() {
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
-
-  const dispatch = useDispatch();
-  const filters = useSelector(selectFilters);
-
-  const handlePriceChange = (e) => {
-    dispatch(
-      setPriceRange({
-        min: 0,
-        max: parseInt(e.target.value),
-      })
-    );
-  };
-
-  const handleCategoryChange = (category) => {
-    dispatch(toggleCategory(category));
-  };
-
-  const handleRatingChange = (rating) => {
-    dispatch(setRating(rating));
-  };
-
-  const handleSortChange = (sortOrder) => {
-    dispatch(setSortOrder(sortOrder));
-  };
-
-  const handleClearFilters = () => {
-    dispatch(resetFilters());
-  };
+  const {
+    filters,
+    handlePriceChange,
+    handleCategoryChange,
+    handleRatingChange,
+    handleSortChange,
+    handleClearFilters,
+  } = useFilterHandlers();
 
   return (
-    <>
+    <div className="filter-container">
       <button
-        className={`btn w-100 d-md-none mb-3 d-flex align-items-center justify-content-between ${
-          isFiltersVisible ? "btn-dark" : "btn-outline-dark"
-        }`}
+        className="btn btn-outline-dark d-md-none w-100 mb-3 d-flex justify-content-between align-items-center"
         onClick={() => setIsFiltersVisible(!isFiltersVisible)}
-        aria-expanded={isFiltersVisible}
-        aria-controls="mobile-filters"
       >
-        <div className="d-flex align-items-center gap-2">
-          <i
-            className={`bi bi-funnel${isFiltersVisible ? "-fill" : ""} fs-5`}
-          ></i>
-          <span className="fw-semibold">
-            {isFiltersVisible ? "Hide Filters" : "Show Filters"}
-          </span>
-        </div>
-
+        <span>
+          <i className="bi bi-funnel me-2"></i>
+          {isFiltersVisible ? "Hide Filters" : "Show Filters"}
+        </span>
         {(filters.selectedCategories.length > 0 ||
           filters.selectedRating > 0 ||
           filters.sortOrder !== "lowToHigh") && (
           <span className="badge bg-danger rounded-pill">
-            {[
-              filters.selectedCategories.length,
-              filters.selectedRating > 0 ? 1 : 0,
-              filters.sortOrder !== "lowToHigh" ? 1 : 0,
-            ].reduce((a, b) => a + b, 0)}
+            {filters.selectedCategories.length +
+              (filters.selectedRating > 0 ? 1 : 0) +
+              (filters.sortOrder !== "lowToHigh" ? 1 : 0)}
           </span>
         )}
       </button>
-      <div
-        className={`${isFiltersVisible ? "d-block" : "d-none"} d-md-block`}
-        id="mobile-filters"
-      >
-        <div className="mt-2 d-flex justify-content-between">
-          <h4 className="">
-            <strong>Filters</strong>
-          </h4>
-          <h5
-            className=" mt-1"
-            style={{ textDecoration: "underline", cursor: "pointer" }}
-            onClick={handleClearFilters}
-          >
+      <div className={`${isFiltersVisible ? "d-block" : "d-none"} d-md-block`}>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h5 className="mb-0">Filters</h5>
+          <button className="btn btn-link p-0" onClick={handleClearFilters}>
             Clear
-          </h5>
+          </button>
         </div>
-        <div className="row my-5">
-          <h5>
-            <strong>Price</strong>
-          </h5>
+        <div className="mb-4">
+          <h6 className="mb-3">Price</h6>
           <input
             type="range"
+            className="form-range"
             min="0"
             max="8000"
             value={filters.priceRange.max}
             onChange={handlePriceChange}
-            className="form-range"
           />
           <small className="text-muted">
-            Range: ${filters.priceRange.min} - ${filters.priceRange.max}
+            ${filters.priceRange.min} - ${filters.priceRange.max}
           </small>
         </div>
-        <div className="row my-5">
-          <h5>
-            <strong>Category</strong>
-          </h5>
+        <div className="mb-4">
+          <h6 className="mb-3">Category</h6>
           {["Premium", "Budget", "Ultra-Premium"].map((category) => (
-            <label key={category} className="d-block mb-2">
+            <div className="form-check mb-2" key={category}>
               <input
+                className="form-check-input"
                 type="checkbox"
                 checked={filters.selectedCategories.includes(category)}
                 onChange={() => handleCategoryChange(category)}
-                className="me-2"
+                id={`category-${category}`}
               />
-              {category}
-            </label>
+              <label
+                className="form-check-label"
+                htmlFor={`category-${category}`}
+              >
+                {category}
+              </label>
+            </div>
           ))}
         </div>
-        <div className="row my-5">
-          <h5>
-            <strong>Rating</strong>
-          </h5>
+        <div className="mb-4">
+          <h6 className="mb-3">Rating</h6>
           {[4, 3, 2, 1].map((rating) => (
-            <label key={rating} className="d-block mb-2">
+            <div className="form-check mb-2" key={rating}>
               <input
+                className="form-check-input"
                 type="radio"
-                name="ratingOptions"
+                name="rating"
                 checked={filters.selectedRating === rating}
                 onChange={() => handleRatingChange(rating)}
-                className="me-2"
+                id={`rating-${rating}`}
               />
-              {rating} Stars & above
-            </label>
+              <label className="form-check-label" htmlFor={`rating-${rating}`}>
+                {rating} Stars & above
+              </label>
+            </div>
           ))}
         </div>
-        <div className="row my-5">
-          <h5>
-            <strong>Sort by</strong>
-          </h5>
-          <label className="d-block mb-2">
+        <div className="mb-4">
+          <h6 className="mb-3">Sort by</h6>
+          <div className="form-check mb-2">
             <input
+              className="form-check-input"
               type="radio"
-              name="sortByOptions"
+              name="sort"
               checked={filters.sortOrder === "lowToHigh"}
               onChange={() => handleSortChange("lowToHigh")}
-              className="me-2"
+              id="sort-low"
             />
-            Price - Low to High
-          </label>
-          <label className="d-block">
+            <label className="form-check-label" htmlFor="sort-low">
+              Price - Low to High
+            </label>
+          </div>
+          <div className="form-check">
             <input
+              className="form-check-input"
               type="radio"
-              name="sortByOptions"
+              name="sort"
               checked={filters.sortOrder === "highToLow"}
               onChange={() => handleSortChange("highToLow")}
-              className="me-2"
+              id="sort-high"
             />
-            Price - High to Low
-          </label>
+            <label className="form-check-label" htmlFor="sort-high">
+              Price - High to Low
+            </label>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

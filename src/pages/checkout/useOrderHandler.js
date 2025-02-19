@@ -7,7 +7,7 @@ import {
 import useQuantity from "../../contexts/CartContext";
 import { useNavigate } from "react-router-dom";
 import useCheckoutHandlers from "./useCheckoutHandlers";
-import useCartProducts from "../cart/useCartProducts";
+import useCartProducts from "../../customHooks/useCartProducts";
 import useAddressContext from "../../contexts/AddressContext";
 import usePriceDetails from "../../customHooks/usePriceDetails";
 import {
@@ -18,7 +18,7 @@ import {
 export default function useOrderHandler() {
   const dispatch = useDispatch();
   const { formData, setFormData } = useAddressContext();
-  const {  productQuantities } = usePriceDetails();
+  const { productQuantities } = usePriceDetails();
 
   const { selectedAddress } = useCheckoutHandlers();
   const products = useCartProducts();

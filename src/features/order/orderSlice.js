@@ -7,7 +7,6 @@ import axios from "axios";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
-//GET ALL ORDERS
 export const fetchAllOrders = createAsyncThunk(
   "orders/fetchAllOrders",
   async () => {
@@ -22,7 +21,6 @@ export const fetchAllOrders = createAsyncThunk(
   }
 );
 
-//POST ORDER
 export const postOrder = createAsyncThunk(
   "orders/postOrder",
   async (orderData) => {
@@ -48,7 +46,6 @@ export const ordersSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch all orders
       .addCase(fetchAllOrders.pending, (state) => {
         state.fetchStatus = "loading";
       })
@@ -62,7 +59,6 @@ export const ordersSlice = createSlice({
         state.error = action.error.message;
       })
 
-      // Post new order
       .addCase(postOrder.pending, (state) => {
         state.addOrderStatus = "loading";
       })

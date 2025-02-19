@@ -1,13 +1,16 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
-import { fetchAllProductsAsync, selectFilteredProducts } from "../features/product/productSlice";
+import {
+  fetchAllProductsAsync,
+  selectFilteredProducts,
+} from "../features/product/productSlice";
 
 export default function useFilteredProducts() {
-   const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-   const filteredProducts = useSelector(selectFilteredProducts);
+  const filteredProducts = useSelector(selectFilteredProducts);
 
-   useEffect(() => {
+  useEffect(() => {
     dispatch(fetchAllProductsAsync());
   }, [dispatch]);
 
