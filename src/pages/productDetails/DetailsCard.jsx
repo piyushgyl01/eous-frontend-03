@@ -57,7 +57,7 @@ export default function DetailsCard({
               className="bg-primary text-light py-2"
               type="button"
             >
-              {updateCartStatus === "loading" ? (
+              {/* {updateCartStatus === "loading" ? (
                   <>
                     <span
                       className="spinner-border spinner-border-sm"
@@ -67,7 +67,8 @@ export default function DetailsCard({
                   </>
                 ) : (
                   "Buy Now"
-                )}
+                )} */}
+                Buy Now
             </div>
             {product?.isAddedToCart ? (
               <button
