@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import usePriceDetails from "../../customHooks/usePriceDetails";
 import useCheckoutHandlers from "./useCheckoutHandlers";
 import useAddress from "./useAddress";
@@ -13,7 +12,6 @@ import AddressView from "./AddressView";
 import useAddressStatuses from "../../customHooks/useAddressStatuses";
 import useOrderStatuses from "../../customHooks/useOrderStatuses";
 import Notification from "../../components/Notification";
-import { useNavigate } from "react-router-dom";
 
 export default function Checkout() {
   const { totalDiscountedPrice, productQuantities } = usePriceDetails();
@@ -21,8 +19,6 @@ export default function Checkout() {
   const addresses = useAddress();
   const { fetchStatus, updateStatus } = useAddressStatuses();
   const { formData, setFormData } = useAddressContext();
-  const navigate = useNavigate();
-  
   const {
     handleDelete,
     handleUpdate,
@@ -33,16 +29,8 @@ export default function Checkout() {
     handleEditClick,
     handleModalClose,
   } = useCheckoutHandlers();
-  
-  const { handlePlaceOrder, isProcessingCart } = useOrderHandler();
+  const { handlePlaceOrder } = useOrderHandler();
   const { addOrderStatus } = useOrderStatuses();
-  
-  // Redirect to cart if empty
-  useEffect(() => {
-    if (products.length === 0 && !isProcessingCart) {
-      navigate("/cart");
-    }
-  }, [products.length, navigate, isProcessingCart]);
 
   return (
     <div className="container py-5">
@@ -50,7 +38,7 @@ export default function Checkout() {
         <Loader />
       ) : (
         <>
-          {fetchStatus === "error" && (
+          {fetchStatus === "loading" && (
             <ErrorToast text="Unable to fetch the addresses" />
           )}
           <div className="row">
