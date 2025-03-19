@@ -30,11 +30,13 @@ export default function useCheckoutHandlers() {
       email: address.email,
     });
   };
+  
   const handleEditClick = (address) => {
     setFormData(address);
     setEditAddressId(address._id);
     setShowEditModal(true);
   };
+  
   const handleModalClose = () => {
     setShowEditModal(false);
     setEditAddressId(null);
@@ -52,6 +54,7 @@ export default function useCheckoutHandlers() {
   };
 
   const { deleteStatus, updateStatus } = useSelector(getAllAddressStatuses);
+  
   useEffect(() => {
     if (deleteStatus === "success") {
       dispatch(
@@ -61,6 +64,10 @@ export default function useCheckoutHandlers() {
           type: "success",
         })
       );
+
+      if (selectedAddress === editAddressId) {
+        setSelectedAddress(null);
+      }
 
       const timer = setTimeout(() => {
         dispatch(setMessage({ show: false, message: "", type: "warning" }));
@@ -76,7 +83,7 @@ export default function useCheckoutHandlers() {
         })
       );
     }
-  }, [deleteStatus]);
+  }, [deleteStatus, dispatch, editAddressId, selectedAddress]);
 
   useEffect(() => {
     if (updateStatus === "success") {
@@ -87,6 +94,10 @@ export default function useCheckoutHandlers() {
           type: "success",
         })
       );
+
+      if (selectedAddress === editAddressId) {
+        setSelectedAddress(editAddressId);
+      }
 
       const timer = setTimeout(() => {
         dispatch(setMessage({ show: false, message: "", type: "warning" }));
@@ -102,7 +113,7 @@ export default function useCheckoutHandlers() {
         })
       );
     }
-  }, [updateStatus]);
+  }, [updateStatus, dispatch, editAddressId, selectedAddress]);
 
   const handleDelete = (id) => {
     const isConfirmed = window.confirm(
@@ -110,6 +121,9 @@ export default function useCheckoutHandlers() {
     );
 
     if (isConfirmed) {
+      if (selectedAddress === id) {
+        setSelectedAddress(null);
+      }
       dispatch(deleteAddress(id));
     }
   };
@@ -118,6 +132,7 @@ export default function useCheckoutHandlers() {
     dispatch(updateAddress({ id: editAddressId, formData }));
     handleModalClose();
   };
+  
   return {
     handleDelete,
     handleUpdate,
