@@ -1,6 +1,5 @@
 // src/components/PriceDetails.jsx
 import { Link } from "react-router-dom";
-import { useMemo } from "react";
 
 export default function PriceDetails({
   totalDiscountedPrice,
@@ -10,41 +9,19 @@ export default function PriceDetails({
   addOrderStatus,
   handlePlaceOrder,
 }) {
-  // Memoized calculations to ensure consistency
-  const calculatedPrices = useMemo(() => {
-    // Calculate original price (before discount)
-    const itemsTotal = products.reduce((acc, product) => {
-      const qty = productQuantities[product._id] || 1;
-      return acc + product.productPrice * 2 * qty;
-    }, 0);
+  const itemsTotal = products.reduce((acc, product) => {
+    const qty = productQuantities[product._id] || 1;
+    return acc + product.productPrice * 2 * qty;
+  }, 0);
 
-    // Calculate discounted price
-    const discountTotal = products.reduce((acc, product) => {
-      const qty = productQuantities[product._id] || 1;
-      return acc + product.productPrice * qty;
-    }, 0);
+  const discountTotal = products.reduce((acc, product) => {
+    const qty = productQuantities[product._id] || 1;
+    return acc + product.productPrice * qty;
+  }, 0);
 
-    // Calculate delivery fee
-    const deliveryFee = products.length > 0 ? (discountTotal > 100 ? 0 : 5) : 0;
-    
-    // Calculate final total
-    const finalTotal = discountTotal + deliveryFee;
-
-    // Calculate savings
-    const savings = itemsTotal - discountTotal;
-
-    return {
-      itemsTotal,
-      discountTotal,
-      deliveryFee,
-      finalTotal,
-      savings
-    };
-  }, [products, productQuantities]);
-
-  if (products.length === 0) {
-    return null;
-  }
+  const deliveryFee = products.length > 0 ? (totalDiscountedPrice > 100 ? 0 : 5) : 0;
+  
+  const finalTotal = discountTotal + deliveryFee;
 
   return (
     <div className="col-md-4">
@@ -55,26 +32,26 @@ export default function PriceDetails({
         <hr />
         <div className="d-flex justify-content-between">
           <p>Price ({products.length} items)</p>
-          <p>${calculatedPrices.itemsTotal.toFixed(2)}</p>
+          <p>${itemsTotal.toFixed(2)}</p>
         </div>
         <div className="d-flex justify-content-between">
           <p>Discount</p>
-          <p>-${calculatedPrices.savings.toFixed(2)}</p>
+          <p>-${(itemsTotal - discountTotal).toFixed(2)}</p>
         </div>
         <div className="d-flex justify-content-between">
           <p>Delivery Charges</p>
-          <p>${calculatedPrices.deliveryFee.toFixed(2)}</p>
+          <p>${deliveryFee.toFixed(2)}</p>
         </div>
         <hr />
         <div className="d-flex justify-content-between">
           <h4>
             <strong>TOTAL AMOUNT</strong>
           </h4>
-          <p>${calculatedPrices.finalTotal.toFixed(2)}</p>
+          <p>${finalTotal.toFixed(2)}</p>
         </div>
         <hr />
         <p>
-          You will save ${calculatedPrices.savings.toFixed(2)} on this order
+          You will save ${(itemsTotal - discountTotal).toFixed(2)} on this order
         </p>
         {cart ? (
           <div className="d-grid gap-2 col-12 mx-auto text-center">
