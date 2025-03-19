@@ -2,6 +2,7 @@ import {
   deleteAddress,
   getAllAddressStatuses,
   updateAddress,
+  getAllAddresses,
 } from "../../features/address/addressSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
@@ -13,8 +14,42 @@ export default function useCheckoutHandlers() {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editAddressId, setEditAddressId] = useState(null);
+  const [addressBeingUpdated, setAddressBeingUpdated] = useState(null);
 
   const dispatch = useDispatch();
+
+  const addresses = useSelector(getAllAddresses);
+  
+  const { deleteStatus, updateStatus } = useSelector(getAllAddressStatuses);
+
+  useEffect(() => {
+    if (updateStatus === "success" && addressBeingUpdated) {
+      setSelectedAddress(addressBeingUpdated);
+      setAddressBeingUpdated(null);
+      
+      dispatch(
+        setMessage({
+          show: true,
+          message: "Address updated successfully",
+          type: "success",
+        })
+      );
+
+      // Clear message after delay
+      setTimeout(() => {
+        dispatch(setMessage({ show: false, message: "", type: "warning" }));
+      }, 3000);
+    } else if (updateStatus === "error") {
+      setAddressBeingUpdated(null);
+      dispatch(
+        setMessage({
+          show: true,
+          message: "Unable to update the address",
+          type: "warning",
+        })
+      );
+    }
+  }, [updateStatus, addressBeingUpdated, dispatch]);
 
   const handleAddressSelect = (address) => {
     setSelectedAddress(address._id);
@@ -32,7 +67,7 @@ export default function useCheckoutHandlers() {
   };
   
   const handleEditClick = (address) => {
-    setFormData(address);
+    setFormData({...address});
     setEditAddressId(address._id);
     setShowEditModal(true);
   };
@@ -40,20 +75,38 @@ export default function useCheckoutHandlers() {
   const handleModalClose = () => {
     setShowEditModal(false);
     setEditAddressId(null);
-    setFormData({
-      firstName: "",
-      lastName: "",
-      country: "",
-      street: "",
-      town: "",
-      province: "",
-      zip: 0,
-      phoneNumber: 0,
-      email: "",
-    });
+    
+    if (selectedAddress) {
+      const currentAddress = addresses.find(addr => addr._id === selectedAddress);
+      if (currentAddress) {
+        setFormData({...currentAddress});
+      } else {
+        setFormData({
+          firstName: "",
+          lastName: "",
+          country: "",
+          street: "",
+          town: "",
+          province: "",
+          zip: 0,
+          phoneNumber: 0,
+          email: "",
+        });
+      }
+    } else {
+      setFormData({
+        firstName: "",
+        lastName: "",
+        country: "",
+        street: "",
+        town: "",
+        province: "",
+        zip: 0,
+        phoneNumber: 0,
+        email: "",
+      });
+    }
   };
-
-  const { deleteStatus, updateStatus } = useSelector(getAllAddressStatuses);
   
   useEffect(() => {
     if (deleteStatus === "success") {
@@ -67,13 +120,23 @@ export default function useCheckoutHandlers() {
 
       if (selectedAddress === editAddressId) {
         setSelectedAddress(null);
+        
+        setFormData({
+          firstName: "",
+          lastName: "",
+          country: "",
+          street: "",
+          town: "",
+          province: "",
+          zip: 0,
+          phoneNumber: 0,
+          email: "",
+        });
       }
 
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         dispatch(setMessage({ show: false, message: "", type: "warning" }));
       }, 3000);
-
-      return () => clearTimeout(timer);
     } else if (deleteStatus === "error") {
       dispatch(
         setMessage({
@@ -83,37 +146,7 @@ export default function useCheckoutHandlers() {
         })
       );
     }
-  }, [deleteStatus, dispatch, editAddressId, selectedAddress]);
-
-  useEffect(() => {
-    if (updateStatus === "success") {
-      dispatch(
-        setMessage({
-          show: true,
-          message: "Address updated successfully",
-          type: "success",
-        })
-      );
-
-      if (selectedAddress === editAddressId) {
-        setSelectedAddress(editAddressId);
-      }
-
-      const timer = setTimeout(() => {
-        dispatch(setMessage({ show: false, message: "", type: "warning" }));
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    } else if (updateStatus === "error") {
-      dispatch(
-        setMessage({
-          show: true,
-          message: "Unable to update the address",
-          type: "warning",
-        })
-      );
-    }
-  }, [updateStatus, dispatch, editAddressId, selectedAddress]);
+  }, [deleteStatus, dispatch, editAddressId, selectedAddress, setFormData]);
 
   const handleDelete = (id) => {
     const isConfirmed = window.confirm(
@@ -129,7 +162,10 @@ export default function useCheckoutHandlers() {
   };
 
   const handleUpdate = () => {
+    setAddressBeingUpdated(editAddressId);
+    
     dispatch(updateAddress({ id: editAddressId, formData }));
+    
     handleModalClose();
   };
   
