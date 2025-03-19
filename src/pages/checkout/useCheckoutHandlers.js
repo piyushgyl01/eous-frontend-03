@@ -1,6 +1,5 @@
 import {
   deleteAddress,
-  getAllAddressStatuses,
   updateAddress,
   getAllAddresses,
 } from "../../features/address/addressSlice";
@@ -14,18 +13,29 @@ export default function useCheckoutHandlers() {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editAddressId, setEditAddressId] = useState(null);
-  const [addressBeingUpdated, setAddressBeingUpdated] = useState(null);
-
   const dispatch = useDispatch();
 
   const addresses = useSelector(getAllAddresses);
   
-  const { deleteStatus, updateStatus } = useSelector(getAllAddressStatuses);
-
   useEffect(() => {
-    if (updateStatus === "success" && addressBeingUpdated) {
-      setSelectedAddress(addressBeingUpdated);
-      setAddressBeingUpdated(null);
+    const handleUpdateSuccess = (updatedAddressId) => {
+      setSelectedAddress(updatedAddressId);
+      
+      const updatedAddress = addresses.find(addr => addr._id === updatedAddressId);
+      
+      if (updatedAddress) {
+        setFormData({
+          firstName: updatedAddress.firstName,
+          lastName: updatedAddress.lastName,
+          country: updatedAddress.country,
+          street: updatedAddress.street,
+          town: updatedAddress.town,
+          province: updatedAddress.province,
+          zip: updatedAddress.zip,
+          phoneNumber: updatedAddress.phoneNumber,
+          email: updatedAddress.email,
+        });
+      }
       
       dispatch(
         setMessage({
@@ -35,21 +45,32 @@ export default function useCheckoutHandlers() {
         })
       );
 
-      // Clear message after delay
       setTimeout(() => {
         dispatch(setMessage({ show: false, message: "", type: "warning" }));
       }, 3000);
-    } else if (updateStatus === "error") {
-      setAddressBeingUpdated(null);
-      dispatch(
-        setMessage({
-          show: true,
-          message: "Unable to update the address",
-          type: "warning",
-        })
-      );
-    }
-  }, [updateStatus, addressBeingUpdated, dispatch]);
+    };
+
+    const updateAddressHandler = async (id, formData) => {
+      try {
+        await dispatch(updateAddress({ id, formData })).unwrap();
+        handleUpdateSuccess(id);
+      } catch (error) {
+        dispatch(
+          setMessage({
+            show: true,
+            message: "Unable to update the address",
+            type: "warning",
+          })
+        );
+      }
+    };
+
+    window.updateAddressHandler = updateAddressHandler;
+
+    return () => {
+      delete window.updateAddressHandler;
+    };
+  }, [addresses, dispatch, setFormData]);
 
   const handleAddressSelect = (address) => {
     setSelectedAddress(address._id);
@@ -81,72 +102,65 @@ export default function useCheckoutHandlers() {
       if (currentAddress) {
         setFormData({...currentAddress});
       } else {
-        setFormData({
-          firstName: "",
-          lastName: "",
-          country: "",
-          street: "",
-          town: "",
-          province: "",
-          zip: 0,
-          phoneNumber: 0,
-          email: "",
-        });
+        resetFormData();
       }
     } else {
-      setFormData({
-        firstName: "",
-        lastName: "",
-        country: "",
-        street: "",
-        town: "",
-        province: "",
-        zip: 0,
-        phoneNumber: 0,
-        email: "",
-      });
+      resetFormData();
     }
   };
   
+  const resetFormData = () => {
+    setFormData({
+      firstName: "",
+      lastName: "",
+      country: "",
+      street: "",
+      town: "",
+      province: "",
+      zip: 0,
+      phoneNumber: 0,
+      email: "",
+    });
+  };
+  
   useEffect(() => {
-    if (deleteStatus === "success") {
-      dispatch(
-        setMessage({
-          show: true,
-          message: "Address deleted successfully",
-          type: "success",
-        })
-      );
-
-      if (selectedAddress === editAddressId) {
-        setSelectedAddress(null);
+    const deleteHandler = async (id) => {
+      try {
+        await dispatch(deleteAddress(id)).unwrap();
         
-        setFormData({
-          firstName: "",
-          lastName: "",
-          country: "",
-          street: "",
-          town: "",
-          province: "",
-          zip: 0,
-          phoneNumber: 0,
-          email: "",
-        });
-      }
+        dispatch(
+          setMessage({
+            show: true,
+            message: "Address deleted successfully",
+            type: "success",
+          })
+        );
 
-      setTimeout(() => {
-        dispatch(setMessage({ show: false, message: "", type: "warning" }));
-      }, 3000);
-    } else if (deleteStatus === "error") {
-      dispatch(
-        setMessage({
-          show: true,
-          message: "Unable to delete the address",
-          type: "warning",
-        })
-      );
-    }
-  }, [deleteStatus, dispatch, editAddressId, selectedAddress, setFormData]);
+        if (selectedAddress === id) {
+          setSelectedAddress(null);
+          resetFormData();
+        }
+
+        setTimeout(() => {
+          dispatch(setMessage({ show: false, message: "", type: "warning" }));
+        }, 3000);
+      } catch (error) {
+        dispatch(
+          setMessage({
+            show: true,
+            message: "Unable to delete the address",
+            type: "warning",
+          })
+        );
+      }
+    };
+
+    window.deleteHandler = deleteHandler;
+    
+    return () => {
+      delete window.deleteHandler;
+    };
+  }, [dispatch, selectedAddress, setFormData]);
 
   const handleDelete = (id) => {
     const isConfirmed = window.confirm(
@@ -154,18 +168,12 @@ export default function useCheckoutHandlers() {
     );
 
     if (isConfirmed) {
-      if (selectedAddress === id) {
-        setSelectedAddress(null);
-      }
-      dispatch(deleteAddress(id));
+      window.deleteHandler(id);
     }
   };
 
   const handleUpdate = () => {
-    setAddressBeingUpdated(editAddressId);
-    
-    dispatch(updateAddress({ id: editAddressId, formData }));
-    
+    window.updateAddressHandler(editAddressId, formData);
     handleModalClose();
   };
   
