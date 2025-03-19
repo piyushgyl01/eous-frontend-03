@@ -1,3 +1,4 @@
+// src/pages/productDetails/DetailsCard.jsx
 import { useNavigate } from "react-router-dom";
 import StarIcon from "@mui/icons-material/Star";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
@@ -8,6 +9,7 @@ import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 import AssignmentReturnOutlinedIcon from "@mui/icons-material/AssignmentReturnOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import useProductStatuses from "../../customHooks/useProductStatuses";
+import { useState } from "react";
 
 export default function DetailsCard({
   product,
@@ -22,7 +24,17 @@ export default function DetailsCard({
 }) {
   const navigate = useNavigate();
   const quantity = productQuantities[id] || 1;
-  const {updateCartStatus} = useProductStatuses()
+  const { updateCartStatus } = useProductStatuses();
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
+
+  const onBuyNowClick = async (id) => {
+    setIsBuyingNow(true);
+    try {
+      await handleBuyNow(id);
+    } finally {
+      setIsBuyingNow(false);
+    }
+  };
 
   return (
     <div className="row">
@@ -52,24 +64,24 @@ export default function DetailsCard({
             alt={product?.productName}
           />
           <div className="d-grid gap-2 col-12 mx-auto">
-            <div
-              onClick={() => handleBuyNow(id)}
+            <button
+              onClick={() => onBuyNowClick(id)}
               className="bg-primary text-light py-2"
               type="button"
+              disabled={isBuyingNow}
             >
-              {/* {updateCartStatus === "loading" ? (
-                  <>
-                    <span
-                      className="spinner-border spinner-border-sm"
-                      aria-hidden="true"
-                    ></span>
-                    <span role="status">Buying...</span>
-                  </>
-                ) : (
-                  "Buy Now"
-                )} */}
-                Buy Now
-            </div>
+              {isBuyingNow ? (
+                <>
+                  <span
+                    className="spinner-border spinner-border-sm"
+                    aria-hidden="true"
+                  ></span>
+                  <span role="status">Processing...</span>
+                </>
+              ) : (
+                "Buy Now"
+              )}
+            </button>
             {product?.isAddedToCart ? (
               <button
                 className="bg-success text-light py-2"
@@ -144,7 +156,7 @@ export default function DetailsCard({
           >
             <button
               onClick={() =>
-                updateQuantity(id, (productQuantities[id] || 1) - 1)
+                updateQuantity(id, Math.max(1, (productQuantities[id] || 1) - 1))
               }
               type="button"
               className="btn btn-outline-secondary"

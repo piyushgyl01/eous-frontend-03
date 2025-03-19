@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import useUnfilteredProducts from "../../customHooks/useUnfilteredProducts";
 import {
+  setMessage,
   updateCartAsync,
   updateWishlistAsync,
 } from "../../features/product/productSlice";
@@ -13,18 +14,38 @@ export default function useBuyNow() {
 
   const handleBuyNow = async (id) => {
     try {
-      const filteredProduct = unfilteredProducts.filter(
-        (prod) => prod._id === id
-      );
+      dispatch(setMessage({
+        show: true,
+        message: "Processing your order...",
+        type: "success",
+      }));
 
-      if (filteredProduct[0].isWishlisted) {
-        dispatch(updateWishlistAsync(id));
+      const product = unfilteredProducts.find(prod => prod._id === id);
+      
+      if (product) {
+        if (product.isWishlisted) {
+          await dispatch(updateWishlistAsync(id)).unwrap();
+        }
+        
+        if (!product.isAddedToCart) {
+          await dispatch(updateCartAsync(id)).unwrap();
+        }
+        
+        navigate("/checkout");
+      } else {
+        throw new Error("Product not found");
       }
-
-      await dispatch(updateCartAsync(id));
-      navigate("/checkout");
     } catch (error) {
-      console.log("Updating cart error", error);
+      console.error("Buy Now error:", error);
+      dispatch(setMessage({
+        show: true,
+        message: "Failed to process your order. Please try again.",
+        type: "warning",
+      }));
+      
+      setTimeout(() => {
+        dispatch(setMessage({ show: false, message: "", type: "warning" }));
+      }, 3000);
     }
   };
 
