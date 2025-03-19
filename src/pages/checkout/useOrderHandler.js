@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getAllOrdersStatuses,
@@ -19,13 +19,16 @@ export default function useOrderHandler() {
   const dispatch = useDispatch();
   const { formData, setFormData } = useAddressContext();
   const { productQuantities } = usePriceDetails();
+  const [isProcessingCart, setIsProcessingCart] = useState(false);
 
   const { selectedAddress } = useCheckoutHandlers();
   const products = useCartProducts();
   const { updateQuantity } = useQuantity();
 
   const { addOrderStatus } = useSelector(getAllOrdersStatuses);
+  const navigate = useNavigate();
 
+  // Handle order status changes
   useEffect(() => {
     if (addOrderStatus === "success") {
       dispatch(
@@ -68,34 +71,44 @@ export default function useOrderHandler() {
     }
   }, [addOrderStatus, dispatch, setFormData]);
 
-  const navigate = useNavigate();
-
+  // Clear cart after successful order
   useEffect(() => {
-    if (addOrderStatus === "success") {
+    if (addOrderStatus === "success" && !isProcessingCart) {
       const removeAllCartItems = async () => {
+        setIsProcessingCart(true);
         try {
-          for (const product of products) {
-            await dispatch(updateCartAsync(product._id));
-          }
-          products.forEach((product) => {
+          // Create a copy of the current products to avoid mutation issues
+          const productsToRemove = [...products];
+          
+          // Clear all quantities first to avoid price calculation issues
+          productsToRemove.forEach((product) => {
             updateQuantity(product._id, 1);
           });
+          
+          // Then remove each product from cart
+          for (const product of productsToRemove) {
+            await dispatch(updateCartAsync(product._id)).unwrap();
+          }
+          
+          // Navigate only after cart is fully cleared
+          navigate("/order-placed");
         } catch (error) {
           console.error("Error clearing cart:", error);
+          dispatch(
+            setMessage({
+              show: true,
+              message: "Error processing order. Some items may remain in cart.",
+              type: "warning",
+            })
+          );
+        } finally {
+          setIsProcessingCart(false);
         }
       };
 
       removeAllCartItems();
-    } else if (addOrderStatus === "error") {
-      dispatch(
-        setMessage({
-          show: true,
-          message: "Error placing order. Please try again.",
-          type: "warning",
-        })
-      );
     }
-  }, [addOrderStatus, dispatch, navigate, products, updateQuantity]);
+  }, [addOrderStatus, dispatch, navigate, products, updateQuantity, isProcessingCart]);
 
   const handlePlaceOrder = async () => {
     const requiredFields = [
@@ -128,8 +141,8 @@ export default function useOrderHandler() {
     const orderData = { items };
 
     try {
-      await dispatch(postOrder(orderData));
-      navigate("/order-placed");
+      await dispatch(postOrder(orderData)).unwrap();
+      // Navigation moved to the useEffect that processes cart clearing
     } catch (error) {
       console.error("Error placing order:", error);
       dispatch(
@@ -142,5 +155,5 @@ export default function useOrderHandler() {
     }
   };
 
-  return { handlePlaceOrder };
+  return { handlePlaceOrder, isProcessingCart };
 }
