@@ -13,19 +13,20 @@ import usePriceDetails from "../../customHooks/usePriceDetails";
 import {
   setMessage,
   updateCartAsync,
+  fetchCartProductsAsync,
 } from "../../features/product/productSlice";
 
 export default function useOrderHandler() {
   const dispatch = useDispatch();
   const { formData, setFormData } = useAddressContext();
   const { productQuantities } = usePriceDetails();
-
   const { selectedAddress } = useCheckoutHandlers();
   const products = useCartProducts();
-  const { updateQuantity } = useQuantity();
-
+  const { updateQuantity, resetQuantities } = useQuantity();
   const { addOrderStatus } = useSelector(getAllOrdersStatuses);
+  const navigate = useNavigate();
 
+  // Handle order success
   useEffect(() => {
     if (addOrderStatus === "success") {
       dispatch(
@@ -36,6 +37,7 @@ export default function useOrderHandler() {
         })
       );
 
+      // Reset form data
       setFormData({
         firstName: "",
         lastName: "",
@@ -48,6 +50,7 @@ export default function useOrderHandler() {
         email: "",
       });
 
+      // Clear message after delay
       setTimeout(() => {
         dispatch(
           setMessage({
@@ -68,18 +71,22 @@ export default function useOrderHandler() {
     }
   }, [addOrderStatus, dispatch, setFormData]);
 
-  const navigate = useNavigate();
-
+  // Handle cart clearing after order placement
   useEffect(() => {
     if (addOrderStatus === "success") {
       const removeAllCartItems = async () => {
         try {
+          // First reset all quantities 
+          resetQuantities();
+          
+          // Then remove all products from cart
           for (const product of products) {
             await dispatch(updateCartAsync(product._id));
           }
-          products.forEach((product) => {
-            updateQuantity(product._id, 1);
-          });
+          
+          // Force refresh cart products list
+          await dispatch(fetchCartProductsAsync());
+          
         } catch (error) {
           console.error("Error clearing cart:", error);
         }
@@ -95,7 +102,7 @@ export default function useOrderHandler() {
         })
       );
     }
-  }, [addOrderStatus, dispatch, navigate, products, updateQuantity]);
+  }, [addOrderStatus, dispatch, navigate, products, resetQuantities]);
 
   const handlePlaceOrder = async () => {
     const requiredFields = [
