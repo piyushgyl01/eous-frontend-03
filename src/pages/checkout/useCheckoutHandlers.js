@@ -18,59 +18,23 @@ export default function useCheckoutHandlers() {
   const addresses = useSelector(getAllAddresses);
   
   useEffect(() => {
-    const handleUpdateSuccess = (updatedAddressId) => {
-      setSelectedAddress(updatedAddressId);
-      
-      const updatedAddress = addresses.find(addr => addr._id === updatedAddressId);
-      
-      if (updatedAddress) {
+    if (selectedAddress) {
+      const currentAddress = addresses.find(addr => addr._id === selectedAddress);
+      if (currentAddress) {
         setFormData({
-          firstName: updatedAddress.firstName,
-          lastName: updatedAddress.lastName,
-          country: updatedAddress.country,
-          street: updatedAddress.street,
-          town: updatedAddress.town,
-          province: updatedAddress.province,
-          zip: updatedAddress.zip,
-          phoneNumber: updatedAddress.phoneNumber,
-          email: updatedAddress.email,
+          firstName: currentAddress.firstName,
+          lastName: currentAddress.lastName,
+          country: currentAddress.country,
+          street: currentAddress.street,
+          town: currentAddress.town,
+          province: currentAddress.province,
+          zip: currentAddress.zip,
+          phoneNumber: currentAddress.phoneNumber,
+          email: currentAddress.email,
         });
       }
-      
-      dispatch(
-        setMessage({
-          show: true,
-          message: "Address updated successfully",
-          type: "success",
-        })
-      );
-
-      setTimeout(() => {
-        dispatch(setMessage({ show: false, message: "", type: "warning" }));
-      }, 3000);
-    };
-
-    const updateAddressHandler = async (id, formData) => {
-      try {
-        await dispatch(updateAddress({ id, formData })).unwrap();
-        handleUpdateSuccess(id);
-      } catch (error) {
-        dispatch(
-          setMessage({
-            show: true,
-            message: "Unable to update the address",
-            type: "warning",
-          })
-        );
-      }
-    };
-
-    window.updateAddressHandler = updateAddressHandler;
-
-    return () => {
-      delete window.updateAddressHandler;
-    };
-  }, [addresses, dispatch, setFormData]);
+    }
+  }, [addresses, selectedAddress, setFormData]);
 
   const handleAddressSelect = (address) => {
     setSelectedAddress(address._id);
@@ -124,22 +88,80 @@ export default function useCheckoutHandlers() {
   };
   
   useEffect(() => {
-    const deleteHandler = async (id) => {
+    let isMounted = true;
+    
+    const handleDeleteEffect = async (id) => {
       try {
         await dispatch(deleteAddress(id)).unwrap();
+        
+        if (isMounted) {
+          dispatch(
+            setMessage({
+              show: true,
+              message: "Address deleted successfully",
+              type: "success",
+            })
+          );
+
+          if (selectedAddress === id) {
+            setSelectedAddress(null);
+            resetFormData();
+          }
+
+          setTimeout(() => {
+            if (isMounted) {
+              dispatch(setMessage({ show: false, message: "", type: "warning" }));
+            }
+          }, 3000);
+        }
+      } catch (error) {
+        if (isMounted) {
+          dispatch(
+            setMessage({
+              show: true,
+              message: "Unable to delete the address",
+              type: "warning",
+            })
+          );
+        }
+      }
+    };
+    
+    window.handleDeleteEffect = handleDeleteEffect;
+    
+    return () => {
+      isMounted = false;
+      delete window.handleDeleteEffect;
+    };
+  }, [dispatch, selectedAddress, resetFormData]);
+
+  const handleDelete = (id) => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this address?"
+    );
+
+    if (isConfirmed) {
+      window.handleDeleteEffect(id);
+    }
+  };
+
+  const handleUpdate = () => {
+    const updateAddressAndSelectIt = async () => {
+      try {
+        const result = await dispatch(updateAddress({ 
+          id: editAddressId, 
+          formData 
+        })).unwrap();
+        
+        setSelectedAddress(editAddressId);
         
         dispatch(
           setMessage({
             show: true,
-            message: "Address deleted successfully",
+            message: "Address updated successfully",
             type: "success",
           })
         );
-
-        if (selectedAddress === id) {
-          setSelectedAddress(null);
-          resetFormData();
-        }
 
         setTimeout(() => {
           dispatch(setMessage({ show: false, message: "", type: "warning" }));
@@ -148,32 +170,14 @@ export default function useCheckoutHandlers() {
         dispatch(
           setMessage({
             show: true,
-            message: "Unable to delete the address",
+            message: "Unable to update the address",
             type: "warning",
           })
         );
       }
     };
-
-    window.deleteHandler = deleteHandler;
     
-    return () => {
-      delete window.deleteHandler;
-    };
-  }, [dispatch, selectedAddress, setFormData]);
-
-  const handleDelete = (id) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this address?"
-    );
-
-    if (isConfirmed) {
-      window.deleteHandler(id);
-    }
-  };
-
-  const handleUpdate = () => {
-    window.updateAddressHandler(editAddressId, formData);
+    updateAddressAndSelectIt();
     handleModalClose();
   };
   
