@@ -16,7 +16,7 @@ export default function Profile() {
     handleModalClose,
     handlePostAddress,
   } = useProfileHandler();
-  const orders = useOrders();
+  const {orders} = useOrders();
   const { fetchStatus, addStatus } = useOrderStatuses();
 
   return (

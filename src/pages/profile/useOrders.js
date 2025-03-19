@@ -11,5 +11,9 @@ export default function useOrders() {
     dispatch(fetchAllOrders());
   }, [dispatch]);
 
-  return orders;
+  const sortedOrders = [...orders].sort((a, b) => {
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
+  return {orders: sortedOrders};
 }
