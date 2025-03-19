@@ -5,11 +5,15 @@ export default function usePriceDetails() {
   const { productQuantities, updateQuantity } = useQuantity();
 
   const handleDecrement = (productId) => {
-    updateQuantity(productId, (productQuantities[productId] || 1) - 1);
+    const currentQuantity = productQuantities[productId] || 1;
+    if (currentQuantity > 1) {
+      updateQuantity(productId, currentQuantity - 1);
+    }
   };
 
   const handleIncrement = (productId) => {
-    updateQuantity(productId, (productQuantities[productId] || 1) + 1);
+    const currentQuantity = productQuantities[productId] || 1;
+    updateQuantity(productId, currentQuantity + 1);
   };
 
   const products = useCartProducts();
@@ -37,6 +41,8 @@ export default function usePriceDetails() {
     totalOriginalPrice,
     discount,
     deliveryCharges,
+    totalAmount,
+    savings,
     productQuantities,
   };
 }
